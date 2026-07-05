@@ -13,6 +13,7 @@ public class TaskRepository {
     public TaskRepository(File databaseFile) {
         this.databaseFile = databaseFile;
     }
+
     public List<Task> loadTask() throws IOException {
         List<Task> taskList = new ArrayList<>();
 
@@ -24,7 +25,7 @@ public class TaskRepository {
 
             String[] data = line.split("\\|");
 
-            Task task = new Task (
+            Task task = new Task(
                     Long.parseLong(data[0]),
                     data[1],
                     data[2],
@@ -38,17 +39,18 @@ public class TaskRepository {
         reader.close();
         return taskList;
     }
+
     public void saveTask(Task task) throws IOException {
         var writer = new BufferedWriter(new FileWriter(databaseFile, true));
 
         writer.write(
                 task.getTaskId() + "|" +
-                    task.getTaskTitle() + "|" +
-                    task.getSubject() + "|" +
-                    task.getTaskType() + "|" +
-                    task.getDueDate() + "|" +
-                    task.getEstimatedHours() + "|" +
-                    task.getStatus()
+                        task.getTaskTitle() + "|" +
+                        task.getSubject() + "|" +
+                        task.getTaskType() + "|" +
+                        task.getDueDate() + "|" +
+                        task.getEstimatedHours() + "|" +
+                        task.getStatus()
         );
         writer.newLine();
         writer.close();
@@ -71,6 +73,7 @@ public class TaskRepository {
             writer.close();
         }
     }
+
     public void updateTask(Task updatedTask) throws IOException {
 
         List<Task> taskList = loadTask();
@@ -82,6 +85,21 @@ public class TaskRepository {
             if (task.getTaskId().equals(updatedTask.getTaskId())) {
                 taskList.set(i, updatedTask);
                 break;
+            }
+        }
+        saveAllTask(taskList);
+    }
+
+    public void deleteTask(Long taskId) throws IOException {
+
+        List<Task> taskList = loadTask();
+
+        for (int i = 0; i < taskList.size(); i++) {
+
+            Task task = taskList.get(i);
+
+            if (task.getTaskId().equals(taskId)) {
+                taskList.remove(i);
             }
         } saveAllTask(taskList);
     }
