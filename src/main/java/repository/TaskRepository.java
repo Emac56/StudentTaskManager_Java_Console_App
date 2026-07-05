@@ -114,4 +114,17 @@ public class TaskRepository {
             }
         } return null;
     }
+
+    public Task findTaskByTitle(String title) throws IOException {
+
+        List<Task> taskList = loadTask();
+
+        for (Task task : taskList) {
+
+            if (task.getTaskTitle().equalsIgnoreCase(title)) {
+                return task;
+            }
+        } return null;
+    }
 }
+
