@@ -103,4 +103,15 @@ public class TaskRepository {
             }
         } saveAllTask(taskList);
     }
+
+    public Task findTaskById(Long taskId) throws IOException {
+
+        List<Task> taskList = loadTask();
+
+        for (Task task : taskList) {
+            if (task.getTaskId().equals(taskId)) {
+                return task;
+            }
+        } return null;
+    }
 }
