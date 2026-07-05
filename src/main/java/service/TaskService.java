@@ -22,7 +22,7 @@ public class TaskService {
         task.setTaskId(generateTaskId());
         taskRepository.saveTask(task);
 
-        return "Task added successfully!"
+        return "Task added successfully!";
     }
     public List<Task> viewAllTask() throws IOException {
 
@@ -30,20 +30,31 @@ public class TaskService {
 
         return taskList;
     }
-    public Task searchTask(Long taskId) {
+    public Task searchTask(Long taskId) throws IOException {
 
         Task task = taskRepository.findTaskById(taskId);
 
         return task;
     }
 
-    public String updateTask(Task updatedTask) {
+    public String updateTask(Task updatedTask) throws IOException {
 
         Task existingTask = taskRepository.findTaskById(updatedTask.getTaskId());
 
         if (existingTask != null) {
             taskRepository.updateTask(updatedTask);
             return "Task updated successfully!";
+        } else {
+            return "Task not found";
+        }
+    }
+    public String deleteTask(Long taskId) throws IOException {
+
+        Task task = taskRepository.findTaskById(taskId);
+
+        if (task != null) {
+            taskRepository.deleteTask(taskId);
+            return "Task deleted Successfully";
         } else {
             return "Task not found";
         }
