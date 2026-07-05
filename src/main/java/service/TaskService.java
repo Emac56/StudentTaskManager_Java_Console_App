@@ -4,6 +4,7 @@ import model.Task;
 import repository.TaskRepository;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TaskService {
@@ -70,5 +71,17 @@ public class TaskService {
         } else {
             return "Task not found";
         }
+    }
+    public List<Task> viewPendingTask() throws IOException{
+
+        List<Task> taskList =  taskRepository.loadTask();
+
+        List<Task> pendingTask = new ArrayList<>();
+
+        for (Task task : taskList) {
+            if (task.getStatus().equalsIgnoreCase("Pending")) {
+                pendingTask.add(task);
+            }
+        } return pendingTask;
     }
 }
