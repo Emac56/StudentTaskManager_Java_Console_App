@@ -81,7 +81,7 @@ public class TaskController {
         scanner.close();
     }
 
-    void addTaskFlow() throws IOException {
+    public void addTaskFlow() throws IOException {
 
         Task task = view.getTaskInput();
 
@@ -90,16 +90,35 @@ public class TaskController {
         view.displayMessage(result);
     }
 
-    void viewAllTaskFlow() throws IOException {
+    public void viewAllTaskFlow() throws IOException {
 
-        List<Task> result = taskService.viewAllTask();
+        List<Task> tasks = taskService.viewAllTask();
+        view.displayTask(tasks);
+    }
+    public Task searchTaskFlow() throws IOException {
+
+        Long taskId = view.getTaskIdInput();
+
+        Task task = taskService.searchTask(taskId);
+
         view.displayTask(task);
+        return task;
     }
 
-    static void searchTaskFlow() {
-    }
+    public String updateTaskFlow() throws IOException {
 
-    static void updateTaskFlow() {
+        Long taskId = view.getTaskIdInput();
+
+        Task updatedTask = view.getUpdatedTaskInput();
+
+        updatedTask.setTaskId(taskId);
+
+        String result = taskService.updateTask(updatedTask);
+
+        view.displayMessage(result);
+
+        return result;
+
     }
 
     static void markCompletedFlow() {
