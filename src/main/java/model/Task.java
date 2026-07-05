@@ -69,5 +69,20 @@ public class Task {
     public void setSubject(String subject) {
         this.subject = subject;
     }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass()
+        != obj.getClass()) return false;
+
+        Task other (Task) obj;
+
+        return taskTitle.equals(other.taskTitle) &&
+                subject.equals(other.subject) &&
+                taskType.equals(other.taskType) &&
+                dueDate.equals(other.dueDate) &&
+                estimatedHours == other.estimatedHours &&
+                status.equals(other.status);
+    }
 
 }
