@@ -70,8 +70,8 @@ public class TaskRepository {
                             task.getStatus()
             );
             writer.newLine();
-            writer.close();
         }
+        writer.close();
     }
 
     public void updateTask(Task updatedTask) throws IOException {
@@ -101,7 +101,8 @@ public class TaskRepository {
             if (task.getTaskId().equals(taskId)) {
                 taskList.remove(i);
             }
-        } saveAllTask(taskList);
+        }
+        saveAllTask(taskList);
     }
 
     public Task findTaskById(Long taskId) throws IOException {
@@ -112,7 +113,8 @@ public class TaskRepository {
             if (task.getTaskId().equals(taskId)) {
                 return task;
             }
-        } return null;
+        }
+        return null;
     }
 
     public Task findTaskByTitle(String title) throws IOException {
@@ -124,7 +126,8 @@ public class TaskRepository {
             if (task.getTaskTitle().equalsIgnoreCase(title)) {
                 return task;
             }
-        } return null;
+        }
+        return null;
     }
 }
 

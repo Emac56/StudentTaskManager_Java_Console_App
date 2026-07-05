@@ -84,4 +84,28 @@ public class TaskService {
             }
         } return pendingTask;
     }
+    public List<Task> viewCompletedTask() throws IOException {
+
+        List<Task> taskList = taskRepository.loadTask();
+        List<Task> completedTask = new ArrayList<>();
+
+        for (Task task : taskList) {
+            if (task.getStatus().equalsIgnoreCase("Completed")) {
+                completedTask.add(task);
+            }
+        } return completedTask;
+    }
+
+    public Long generateTaskId() throws IOException {
+
+        List<Task> taskList = taskRepository.loadTask();
+
+        Long lastTaskId = 0L;
+
+        for (Task task : taskList) {
+            if (task.getTaskId() > lastTaskId) {
+                lastTaskId = task.getTaskId();
+            }
+        } return lastTaskId + 1;
+    }
 }

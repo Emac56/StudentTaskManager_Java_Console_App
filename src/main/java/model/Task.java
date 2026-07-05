@@ -79,7 +79,7 @@ public class Task {
         if (obj == null || getClass()
         != obj.getClass()) return false;
 
-        Task other (Task) obj;
+        Task other =  (Task) obj;
 
         return taskTitle.equals(other.taskTitle) &&
                 subject.equals(other.subject) &&
