@@ -27,19 +27,7 @@ public class TaskController {
         boolean run = true;
 
         while (run) {
-            out.println("\n======Task Menu======");
-            out.println("[1] Add Task");
-            out.println("[2] View all task");
-            out.println("[3] Search Task");
-            out.println("[4] Update Task");
-            out.println("[5] Mark Completed");
-            out.println("[6] Delete Task");
-            out.println("[7] View Pending Task");
-            out.println("[8] View Completed Task");
-            out.println("[9] View Today's Priority");
-            out.println("[10] Exit");
-            out.print("Enter choice : ");
-            int userChoice = scanner.nextInt();
+
 
             switch (userChoice) {
                 case 1:
@@ -67,9 +55,6 @@ public class TaskController {
                     viewCompletedFlow();
                     break;
                 case 9:
-                    viewTodayPriotityFlow();
-                    break;
-                case 10:
                     run = false;
                     out.println("Exiting program...");
                     break;
@@ -95,17 +80,17 @@ public class TaskController {
         List<Task> tasks = taskService.viewAllTask();
         view.displayTask(tasks);
     }
-    public Task searchTaskFlow() throws IOException {
+
+    public void searchTaskFlow() throws IOException {
 
         Long taskId = view.getTaskIdInput();
 
-        Task task = taskService.searchTask(taskId);
+        Task searchTask = taskService.searchTask(taskId);
 
-        view.displayTask(task);
-        return task;
+        view.displayTask(searchTask);
     }
 
-    public String updateTaskFlow() throws IOException {
+    public void updateTaskFlow() throws IOException {
 
         Long taskId = view.getTaskIdInput();
 
@@ -117,23 +102,37 @@ public class TaskController {
 
         view.displayMessage(result);
 
-        return result;
-
     }
 
-    static void markCompletedFlow() {
+    public void markCompletedFlow() throws IOException {
+
+        Long taskId = view.getTaskIdInput();
+
+        String result = taskService.markTaskCompleted(taskId);
+
+        view.displayMessage(result);
     }
 
-    static void deleteTaskFlow() {
+    public void deleteTaskFlow() throws IOException {
+
+        Long taskId = view.getTaskIdInput();
+
+        String result = taskService.deleteTask(taskId);
+
+        view.displayMessage(result);
     }
 
-    static void viewPendingFlow() {
+    public void viewPendingFlow() throws IOException {
+
+        List<Task> pendingTask = taskService.viewPendingTask();
+
+        view.displayTask(pendingTask);
     }
 
-    static void viewCompletedFlow() {
-    }
+    public void viewCompletedFlow() {
 
-    static void viewTodayPriotityFlow() {
+        List<Task> completedTask = taskService.viewCompletedTask();
+
+        view.displayTask(completedTask);
     }
 }
-

@@ -60,7 +60,7 @@ public class TaskService {
             return "Task not found.";
         }
     }
-    public String markTaskComplete(Long taskId) throws IOException {
+    public String markTaskCompleted(Long taskId) throws IOException {
 
         Task task  = taskRepository.findTaskById(taskId);
 
