@@ -17,12 +17,12 @@ public class TaskService {
         List<Task> taskList = taskRepository.loadTask();
 
         if (taskList.contains(task)) {
-            return "Task already exist";
+            return "Task already exist.";
         }
         task.setTaskId(generateTaskId());
         taskRepository.saveTask(task);
 
-        return "Task added successfully!";
+        return "Task added successfully.";
     }
     public List<Task> viewAllTask() throws IOException {
 
@@ -43,9 +43,9 @@ public class TaskService {
 
         if (existingTask != null) {
             taskRepository.updateTask(updatedTask);
-            return "Task updated successfully!";
+            return "Task updated successfully.";
         } else {
-            return "Task not found";
+            return "Task not found.";
         }
     }
     public String deleteTask(Long taskId) throws IOException {
@@ -54,7 +54,19 @@ public class TaskService {
 
         if (task != null) {
             taskRepository.deleteTask(taskId);
-            return "Task deleted Successfully";
+            return "Task deleted Successfully.";
+        } else {
+            return "Task not found.";
+        }
+    }
+    public String markTaskComplete(Long taskId) throws IOException {
+
+        Task task  = taskRepository.findTaskById(taskId);
+
+        if (task != null) {
+            task.setStatus("Completed");
+            taskRepository.updateTask(task);
+            return "Task mark as completed.";
         } else {
             return "Task not found";
         }
