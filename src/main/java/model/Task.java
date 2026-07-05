@@ -46,6 +46,10 @@ public class Task {
         return subject;
     }
 
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
+
     public void setDueDate(String dueDate) {
         this.dueDate = dueDate;
     }

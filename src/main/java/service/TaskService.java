@@ -12,4 +12,40 @@ public class TaskService {
     public TaskService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
     }
+    public String addTask(Task task) throws IOException {
+
+        List<Task> taskList = taskRepository.loadTask();
+
+        if (taskList.contains(task)) {
+            return "Task already exist";
+        }
+        task.setTaskId(generateTaskId());
+        taskRepository.saveTask(task);
+
+        return "Task added successfully!"
+    }
+    public List<Task> viewAllTask() throws IOException {
+
+        List<Task> taskList = taskRepository.loadTask();
+
+        return taskList;
+    }
+    public Task searchTask(Long taskId) {
+
+        Task task = taskRepository.findTaskById(taskId);
+
+        return task;
+    }
+
+    public String updateTask(Task updatedTask) {
+
+        Task existingTask = taskRepository.findTaskById(updatedTask.getTaskId());
+
+        if (existingTask != null) {
+            taskRepository.updateTask(updatedTask);
+            return "Task updated successfully!";
+        } else {
+            return "Task not found";
+        }
+    }
 }
