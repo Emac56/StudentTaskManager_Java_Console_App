@@ -81,7 +81,7 @@ public class ConsoleView {
             out.println("Status                :" + task.getStatus());
             out.println("------------------------------------------");         
         } else {
-            out.println("Task not found");
+            out.println("\nTask not found");
         }
     }
     public void displayTasks(List<Task> taskList) {
