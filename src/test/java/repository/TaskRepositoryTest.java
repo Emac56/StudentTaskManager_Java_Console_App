@@ -1,167 +1,183 @@
 package repository;
 
 import model.Task;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TaskRepositoryTest {
 
-    private File testFile;
+    @TempDir
+    Path tempDir;
+
     private TaskRepository repository;
+    private File databaseFile;
 
     @BeforeEach
-    void setUp() throws IOException {
-        testFile = File.createTempFile("task-test", ".txt");
-        repository = new TaskRepository(testFile);
-    }
+    void setUp() throws Exception {
 
-    @AfterEach
-    void tearDown() {
-        testFile.delete();
-    }
+        databaseFile = tempDir.resolve("database/tasks.txt").toFile();
 
-    @Test
-    void shouldSaveAndLoadTask() throws IOException {
+        repository = new TaskRepository(databaseFile);
 
-        Task task = new Task(
-                1L,
-                "Java Assignment",
-                "Programming",
-                "Homework",
-                "2026-07-10",
-                3,
-                "Pending"
-        );
-
-        repository.saveTask(task);
-
-        List<Task> tasks = repository.loadTask();
-
-        assertEquals(1, tasks.size());
-
-        Task savedTask = tasks.get(0);
-
-        assertEquals(task.getTaskId(), savedTask.getTaskId());
-        assertEquals(task.getTaskTitle(), savedTask.getTaskTitle());
-        assertEquals(task.getSubject(), savedTask.getSubject());
-        assertEquals(task.getTaskType(), savedTask.getTaskType());
-        assertEquals(task.getDueDate(), savedTask.getDueDate());
-        assertEquals(task.getEstimatedHours(), savedTask.getEstimatedHours());
-        assertEquals(task.getStatus(), savedTask.getStatus());
-    }
-
-    @Test
-    void shouldFindTaskById() throws IOException {
-
-        Task task = new Task(
-                1L,
-                "Math Quiz",
-                "Math",
-                "Quiz",
-                "2026-07-11",
-                2,
-                "Pending"
-        );
-
-        repository.saveTask(task);
-
-        Task result = repository.findTaskById(1L);
-
-        assertNotNull(result);
-        assertEquals("Math Quiz", result.getTaskTitle());
-    }
-
-    @Test
-    void shouldFindTaskByTitle() throws IOException {
-
-        Task task = new Task(
-                1L,
-                "Science Project",
-                "Science",
-                "Project",
-                "2026-07-12",
-                5,
-                "Pending"
-        );
-
-        repository.saveTask(task);
-
-        Task result = repository.findTaskByTitle("science project");
-
-        assertNotNull(result);
-        assertEquals(1L, result.getTaskId());
-    }
-
-    @Test
-    void shouldUpdateTask() throws IOException {
-
-        Task oldTask = new Task(
-                1L,
-                "Old Title",
-                "Programming",
-                "Assignment",
-                "2026-07-10",
-                2,
-                "Pending"
-        );
-
-        repository.saveTask(oldTask);
-
-        Task updatedTask = new Task(
-                1L,
-                "New Title",
-                "Programming",
-                "Assignment",
-                "2026-07-15",
-                4,
-                "Completed"
-        );
-
-        repository.updateTask(updatedTask);
-
-        Task result = repository.findTaskById(1L);
-
-        assertNotNull(result);
-        assertEquals("New Title", result.getTaskTitle());
-        assertEquals("Completed", result.getStatus());
-    }
-
-    @Test
-    void shouldDeleteTask() throws IOException {
-
-        Task task = new Task(
-                1L,
-                "Delete Me",
-                "Programming",
-                "Assignment",
-                "2026-07-10",
-                2,
-                "Pending"
-        );
-
-        repository.saveTask(task);
-
-        repository.deleteTask(1L);
-
-        assertNull(repository.findTaskById(1L));
     }
     @Test
-    void shouldReturnNullWhenIdDoesNotExist() throws IOException {
+void shouldCreateDatabaseFile() {
 
-        Task task = repository.findTaskById(100L);
+    assertTrue(databaseFile.exists());
 
-        assertNull(task);
-    }
+}
     @Test
-    void shouldReturnNullWhenTitleDoesNotExist() throws IOException {
+void shouldSaveTask() throws Exception {
 
-        Task task = repository.findTaskByTitle("Unknown Task");
+    Task task = new Task(
+            1L,
+            "Java",
+            "Programming",
+            "Project",
+            "2026",
+            5,
+            "Pending"
+    );
 
-        assertNull(task);
-    }
+    repository.saveTask(task);
+
+    List<Task> list = repository.loadTask();
+
+    assertEquals(1, list.size());
+}
+    
+    @Test
+void shouldLoadSavedTask() throws Exception {
+
+    Task task = new Task(
+            1L,
+            "Java",
+            "Programming",
+            "Project",
+            "2026",
+            5,
+            "Pending"
+    );
+
+    repository.saveTask(task);
+
+    List<Task> list = repository.loadTask();
+
+    assertEquals("Java", list.get(0).getTaskTitle());
+
+}
+    
+    @Test
+void shouldSaveAllTasks() throws Exception {
+
+    List<Task> tasks = List.of(
+
+            new Task(1L,"Java","Prog","Project","2026",5,"Pending"),
+
+            new Task(2L,"Math","Math","Homework","2026",2,"Pending")
+
+    );
+
+    repository.saveAllTask(tasks);
+
+    assertEquals(2, repository.loadTask().size());
+
+}
+    
+    @Test
+void shouldUpdateTask() throws Exception {
+
+    Task task = new Task(
+            1L,
+            "Old",
+            "Prog",
+            "Project",
+            "2026",
+            5,
+            "Pending"
+    );
+
+    repository.saveTask(task);
+
+    Task updated = new Task(
+            1L,
+            "New",
+            "Prog",
+            "Project",
+            "2026",
+            5,
+            "Completed"
+    );
+
+    repository.updateTask(updated);
+
+    Task result = repository.findTaskById(1L);
+
+    assertEquals("New", result.getTaskTitle());
+
+}
+    
+    @Test
+void shouldDeleteTask() throws Exception {
+
+    repository.saveTask(
+
+            new Task(
+                    1L,
+                    "Java",
+                    "Prog",
+                    "Project",
+                    "2026",
+                    5,
+                    "Pending"
+            )
+
+    );
+
+    repository.deleteTask(1L);
+
+    assertTrue(repository.loadTask().isEmpty());
+
+
+}
+    
+    @Test
+void shouldFindTaskById() throws Exception {
+
+    repository.saveTask(
+
+            new Task(
+                    1L,
+                    "Java",
+                    "Prog",
+                    "Project",
+                    "2026",
+                    5,
+                    "Pending"
+            )
+
+    );
+
+    Task task = repository.findTaskById(1L);
+
+    assertNotNull(task);
+
+}
+    
+    @Test
+void shouldReturnNullWhenTaskIdDoesNotExist() throws Exception {
+
+    Task task = repository.findTaskById(10L);
+
+    assertNull(task);
+
+}
+    
 }

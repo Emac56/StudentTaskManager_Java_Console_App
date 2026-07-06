@@ -1,309 +1,281 @@
 package service;
 
 import model.Task;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import repository.TaskRepository;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class TaskServiceTest {
 
-    private File testFile;
-    private TaskRepository repository;
-    private TaskService service;
+    @Mock
+    private TaskRepository taskRepository;
+
+    private TaskService taskService;
 
     @BeforeEach
-    void setUp() throws IOException {
-        testFile = File.createTempFile("task-service-test", ".txt");
-        repository = new TaskRepository(testFile);
-        service = new TaskService(repository);
-    }
-
-    @AfterEach
-    void tearDown() {
-        testFile.delete();
+    void setUp() {
+        taskService = new TaskService(taskRepository);
     }
 
     @Test
-    void shouldAddTask() throws IOException {
+    void shouldAddTaskSuccessfully() throws IOException {
 
         Task task = new Task(
                 null,
-                "Java Assignment",
+                "Java Project",
                 "Programming",
-                "Homework",
+                "Project",
                 "2026-07-10",
-                3,
-                "Pending"
+                10,
+                null
         );
 
-        String message = service.addTask(task);
+        when(taskRepository.loadTask()).thenReturn(List.of());
 
-        assertEquals("Task added successfully.", message);
+        String result = taskService.addTask(task);
 
-        List<Task> tasks = service.viewAllTask();
+        assertEquals("Task added successfully.", result);
+        assertEquals(1L, task.getTaskId());
+        assertEquals("Pending", task.getStatus());
 
-        assertEquals(1, tasks.size());
-        assertEquals("Java Assignment", tasks.get(0).getTaskTitle());
+        verify(taskRepository).saveTask(task);
+    }
+
+    @Test
+    void shouldNotAddDuplicateTask() throws IOException {
+
+        Task task = new Task(
+                null,
+                "Java Project",
+                "Programming",
+                "Project",
+                "2026-07-10",
+                10,
+                null
+        );
+
+        when(taskRepository.loadTask()).thenReturn(List.of(task));
+
+        String result = taskService.addTask(task);
+
+        assertEquals("Task already exist.", result);
+
+        verify(taskRepository, never()).saveTask(any(Task.class));
     }
 
     @Test
     void shouldSearchTask() throws IOException {
 
         Task task = new Task(
-                null,
-                "Math Quiz",
-                "Math",
-                "Quiz",
-                "2026-07-11",
-                2,
+                1L,
+                "Java Project",
+                "Programming",
+                "Project",
+                "2026-07-10",
+                10,
                 "Pending"
         );
 
-        service.addTask(task);
+        when(taskRepository.findTaskById(1L)).thenReturn(task);
 
-        Task result = service.searchTask(1L);
+        Task result = taskService.searchTask(1L);
 
         assertNotNull(result);
-        assertEquals("Math Quiz", result.getTaskTitle());
+        assertEquals(task, result);
     }
 
     @Test
-    void shouldUpdateTask() throws IOException {
+    void shouldUpdateTaskSuccessfully() throws IOException {
 
         Task task = new Task(
-                null,
-                "Old Title",
-                "Programming",
-                "Assignment",
-                "2026-07-10",
-                2,
-                "Pending"
-        );
-
-        service.addTask(task);
-
-        Task updated = new Task(
                 1L,
-                "New Title",
+                "Updated Task",
                 "Programming",
-                "Assignment",
-                "2026-07-15",
-                4,
-                "Completed"
-        );
-
-        String message = service.updateTask(updated);
-
-        assertEquals("Task updated successfully.", message);
-
-        Task result = service.searchTask(1L);
-
-        assertEquals("New Title", result.getTaskTitle());
-        assertEquals("Completed", result.getStatus());
-    }
-
-    @Test
-    void shouldDeleteTask() throws IOException {
-
-        Task task = new Task(
-                null,
-                "Delete Me",
-                "Programming",
-                "Assignment",
-                "2026-07-10",
-                2,
-                "Pending"
-        );
-
-        service.addTask(task);
-
-        String message = service.deleteTask(1L);
-
-        assertEquals("Task deleted Successfully.", message);
-        assertNull(service.searchTask(1L));
-    }
-
-    @Test
-    void shouldMarkTaskCompleted() throws IOException {
-
-        Task task = new Task(
-                null,
-                "Finish Project",
-                "Capstone",
                 "Project",
                 "2026-07-20",
                 8,
                 "Pending"
         );
 
-        service.addTask(task);
+        when(taskRepository.findTaskById(1L)).thenReturn(task);
 
-        String message = service.markTaskComplete(1L);
+        String result = taskService.updateTask(task);
 
-        assertEquals("Task mark as completed.", message);
+        assertEquals("Task updated successfully.", result);
 
-        Task result = service.searchTask(1L);
-
-        assertEquals("Completed", result.getStatus());
+        verify(taskRepository).updateTask(task);
     }
 
     @Test
-    void shouldViewPendingTasks() throws IOException {
+    void shouldReturnTaskNotFoundWhenUpdating() throws IOException {
 
-        service.addTask(new Task(
-                null,
-                "Pending Task",
+        Task task = new Task(
+                1L,
+                "Updated Task",
                 "Programming",
-                "Homework",
-                "2026-07-10",
-                2,
+                "Project",
+                "2026-07-20",
+                8,
                 "Pending"
-        ));
+        );
 
-        service.addTask(new Task(
-                null,
-                "Completed Task",
-                "Programming",
-                "Homework",
-                "2026-07-10",
-                2,
-                "Completed"
-        ));
+        when(taskRepository.findTaskById(1L)).thenReturn(null);
 
-        List<Task> pending = service.viewPendingTask();
+        String result = taskService.updateTask(task);
 
-        assertEquals(1, pending.size());
-        assertEquals("Pending Task", pending.get(0).getTaskTitle());
+        assertEquals("Task not found.", result);
+
+        verify(taskRepository, never()).updateTask(any(Task.class));
     }
 
     @Test
-    void shouldViewCompletedTasks() throws IOException {
+    void shouldDeleteTaskSuccessfully() throws IOException {
 
-        service.addTask(new Task(
-                null,
-                "Pending Task",
+        Task task = new Task(
+                1L,
+                "Java",
                 "Programming",
-                "Homework",
-                "2026-07-10",
-                2,
+                "Project",
+                "2026",
+                5,
                 "Pending"
-        ));
+        );
 
-        service.addTask(new Task(
-                null,
-                "Completed Task",
+        when(taskRepository.findTaskById(1L)).thenReturn(task);
+
+        String result = taskService.deleteTask(1L);
+
+        assertEquals("Task deleted Successfully.", result);
+
+        verify(taskRepository).deleteTask(1L);
+    }
+
+    @Test
+    void shouldReturnTaskNotFoundWhenDeleting() throws IOException {
+
+        when(taskRepository.findTaskById(1L)).thenReturn(null);
+
+        String result = taskService.deleteTask(1L);
+
+        assertEquals("Task not found.", result);
+
+        verify(taskRepository, never()).deleteTask(anyLong());
+    }
+
+    @Test
+    void shouldMarkTaskCompletedSuccessfully() throws IOException {
+
+        Task task = new Task(
+                1L,
+                "Java",
                 "Programming",
-                "Homework",
-                "2026-07-10",
-                2,
-                "Completed"
-        ));
+                "Project",
+                "2026",
+                5,
+                "Pending"
+        );
 
-        List<Task> completed = service.viewCompletedTask();
+        when(taskRepository.findTaskById(1L)).thenReturn(task);
 
-        assertEquals(1, completed.size());
-        assertEquals("Completed Task", completed.get(0).getTaskTitle());
+        String result = taskService.markTaskCompleted(1L);
+
+        assertEquals("Task mark as completed.", result);
+        assertEquals("Completed", task.getStatus());
+
+        verify(taskRepository).updateTask(task);
+    }
+
+    @Test
+    void shouldReturnTaskNotFoundWhenMarkingCompleted() throws IOException {
+
+        when(taskRepository.findTaskById(1L)).thenReturn(null);
+
+        String result = taskService.markTaskCompleted(1L);
+
+        assertEquals("Task not found", result);
+
+        verify(taskRepository, never()).updateTask(any(Task.class));
+    }
+
+    @Test
+    void shouldReturnPendingTasks() throws IOException {
+
+        List<Task> tasks = List.of(
+                new Task(1L, "Java", "Programming", "Project", "2026", 5, "Pending"),
+                new Task(2L, "Math", "Math", "Homework", "2026", 2, "Completed"),
+                new Task(3L, "English", "English", "Essay", "2026", 3, "Pending")
+        );
+
+        when(taskRepository.loadTask()).thenReturn(tasks);
+
+        List<Task> result = taskService.viewPendingTask();
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void shouldReturnCompletedTasks() throws IOException {
+
+        List<Task> tasks = List.of(
+                new Task(1L, "Java", "Programming", "Project", "2026", 5, "Pending"),
+                new Task(2L, "Math", "Math", "Homework", "2026", 2, "Completed"),
+                new Task(3L, "English", "English", "Essay", "2026", 3, "Completed")
+        );
+
+        when(taskRepository.loadTask()).thenReturn(tasks);
+
+        List<Task> result = taskService.viewCompletedTask();
+
+        assertEquals(2, result.size());
     }
 
     @Test
     void shouldGenerateNextTaskId() throws IOException {
 
-        service.addTask(new Task(
-                null,
-                "Task 1",
-                "Programming",
-                "Homework",
-                "2026-07-10",
-                2,
-                "Pending"
-        ));
-
-        service.addTask(new Task(
-                null,
-                "Task 2",
-                "Programming",
-                "Homework",
-                "2026-07-10",
-                2,
-                "Pending"
-        ));
-
-        Long nextId = service.generateTaskId();
-
-        assertEquals(3L, nextId);
-    }
-
-    @Test
-    void shouldReturnNullWhenTaskNotFound() throws IOException {
-
-        Task task = service.searchTask(999L);
-
-        assertNull(task);
-    }
-
-    @Test
-    void shouldNotDeleteNonExistingTask() throws IOException {
-
-        String message = service.deleteTask(999L);
-
-        assertEquals("Task not found.", message);
-    }
-    @Test
-    void shouldNotUpdateNonExistingTask() throws IOException {
-
-        Task task = new Task(
-                999L,
-                "Unknown",
-                "Programming",
-                "Homework",
-                "2026-07-10",
-                2,
-                "Pending"
+        List<Task> tasks = List.of(
+                new Task(1L, "A", "A", "A", "2026", 1, "Pending"),
+                new Task(5L, "B", "B", "B", "2026", 1, "Pending"),
+                new Task(3L, "C", "C", "C", "2026", 1, "Pending")
         );
 
-        String message = service.updateTask(task);
+        when(taskRepository.loadTask()).thenReturn(tasks);
 
-        assertEquals("Task not found.", message);
-    }
-    @Test
-    void shouldNotMarkCompletedWhenTaskNotFound() throws IOException {
+        Long result = taskService.generateTaskId();
 
-        String message = service.markTaskComplete(999L);
-
-        assertEquals("Task not found", message);
+        assertEquals(6L, result);
     }
 
     @Test
-    void shouldReturnEmptyTaskListWhenDatabaseIsEmpty() throws IOException {
+    void shouldGenerateOneWhenNoTaskExists() throws IOException {
 
-        List<Task> tasks = service.viewAllTask();
+        when(taskRepository.loadTask()).thenReturn(List.of());
 
-        assertTrue(tasks.isEmpty());
+        Long result = taskService.generateTaskId();
+
+        assertEquals(1L, result);
     }
+
     @Test
-    void shouldReturnEmptyPendingTaskList() throws IOException {
+    void shouldReturnAllTasks() throws IOException {
 
-        List<Task> pending = service.viewPendingTask();
+        List<Task> tasks = List.of(
+                new Task(1L, "Java", "Programming", "Project", "2026", 5, "Pending")
+        );
 
-        assertTrue(pending.isEmpty());
-    }
-    @Test
-    void shouldReturnEmptyCompletedTaskList() throws IOException {
+        when(taskRepository.loadTask()).thenReturn(tasks);
 
-        List<Task> completed = service.viewCompletedTask();
+        List<Task> result = taskService.getAllTasks();
 
-        assertTrue(completed.isEmpty());
-    }
-    @Test
-    void shouldGenerateTaskIdOneWhenDatabaseIsEmpty() throws IOException {
-
-        Long id = service.generateTaskId();
-
-        assertEquals(1L, id);
+        assertEquals(tasks, result);
     }
 }

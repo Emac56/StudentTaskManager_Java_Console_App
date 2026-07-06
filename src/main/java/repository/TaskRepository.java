@@ -11,8 +11,14 @@ public class TaskRepository {
     private File databaseFile;
 
     public TaskRepository(File databaseFile) throws IOException {
+        
         this.databaseFile = databaseFile;
         
+        File parent = databaseFile.getParentFile();
+        
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
         if (!databaseFile.exists()) {
             databaseFile.createNewFile();
         }
@@ -122,18 +128,19 @@ public class TaskRepository {
         }
         return null;
     }
-
-    public Task findTaskByTitle(String title) throws IOException {
-
-        List<Task> taskList = loadTask();
-
-        for (Task task : taskList) {
-
-            if (task.getTaskTitle().equalsIgnoreCase(title)) {
-                return task;
-            }
-        }
-        return null;
-    }
 }
+
+    //public Task findTaskByTitle(String title) throws IOException {
+
+        //List<Task> taskList = loadTask();
+
+        //for (Task task : taskList) {
+
+            //if (task.getTaskTitle().equalsIgnoreCase(title)) {
+                //return task;
+            ///}
+        //}
+        //return null;
+    //}
+//}
 

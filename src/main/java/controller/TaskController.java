@@ -19,7 +19,7 @@ public class TaskController {
         this.consoleView = consoleView;
     }
 
-    public void start() throws IOException {
+    public void start() {
             
         boolean run = true;
 
@@ -130,7 +130,7 @@ public class TaskController {
         consoleView.displayTasks(pendingTask);
     }
 
-    public void viewCompletedFlow() throws IOException{
+    public void viewCompletedFlow() throws IOException {
 
         List<Task> completedTask = taskService.viewCompletedTask();
 

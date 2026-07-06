@@ -9,7 +9,7 @@ import controller.TaskController;
 
 public class Main {
     
-    public static void main (String[] args) {
+    public static void main (String[] args) throws IOException {
         
         var databaseFile = new File("database/tasks.txt");
         var taskRepository = new TaskRepository(databaseFile);

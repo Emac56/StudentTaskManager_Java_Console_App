@@ -71,13 +71,15 @@ public class ConsoleView {
     public void displayTask(Task task) {
         
         if(task != null) {
-            out.println("Task ID " + task.getTaskId());
-            out.println("Task Title " + task.getTaskTitle());
-            out.println("Task Subject " + task.getSubject());
-            out.println("Task Type" + task.getTaskType());
-            out.println("Task Due Date" + task.getDueDate());
-            out.println("Task Estimated Hours" + task.getEstimatedHours());
-            out.println("Task Status" + task.getStatus());            
+            out.println("------------------------------------------");
+            out.println("Task ID               :" + task.getTaskId());
+            out.println("Task Title            : " + task.getTaskTitle());
+            out.println("Subject               :" + task.getSubject());
+            out.println("Task Type             :" + task.getTaskType());
+            out.println("Due Date              : " + task.getDueDate());
+            out.println("Estimated Hours       :" + task.getEstimatedHours());
+            out.println("Status                :" + task.getStatus());
+            out.println("------------------------------------------");         
         } else {
             out.println("Task not found");
         }
