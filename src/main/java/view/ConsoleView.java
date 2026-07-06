@@ -3,6 +3,7 @@ package view;
 import model.Task;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Scanner;
 
 import static java.lang.System.out;
@@ -15,7 +16,7 @@ public class ConsoleView {
         this.scanner = scanner;
     }
 
-    public int showMainMenu() throws IOException {
+    public int showMainMenu() {
         out.println("===========================");
         out.println("    STUDENT TASK MANAGER   ");
         out.println("===========================");
@@ -30,6 +31,7 @@ public class ConsoleView {
         out.println("[9] Exit");
         out.print("Enter choice: ");
         int userChoice = scanner.nextInt();
+        scanner.nextLine();
 
         return userChoice;
     }
@@ -48,8 +50,58 @@ public class ConsoleView {
         String taskDueDate =  scanner.nextLine();
 
         out.print("Enter Task Estimated Hours:");
-        int taskEstimatedHours =  scanner.nextInt();
+        int taskEstimatedHours = Integer.parseInt(scanner.nextLine());
 
-        var newTask = Task(taskTitle)
+        return new Task(
+        null,
+        taskTitle,
+        taskSubject,
+        taskType,
+        taskDueDate,
+        taskEstimatedHours,
+        null);
+    }
+    public Long readTaskId() {
+        
+        out.print("Enter Task Id:");
+        Long taskId = Long.parseLong(scanner.nextLine());
+        
+        return taskId;
+    }
+    public void displayTask(Task task) {
+        
+        if(task != null) {
+            out.println("Task ID " + task.getTaskId());
+            out.println("Task Title " + task.getTaskTitle());
+            out.println("Task Subject " + task.getSubject());
+            out.println("Task Type" + task.getTaskType());
+            out.println("Task Due Date" + task.getDueDate());
+            out.println("Task Estimated Hours" + task.getEstimatedHours());
+            out.println("Task Status" + task.getStatus());            
+        } else {
+            out.println("Task not found");
+        }
+    }
+    public void displayTasks(List<Task> taskList) {
+        
+        if (taskList.isEmpty()) {
+            out.println("No Tasks Found");
+        } else {
+            for (Task task : taskList) {
+                out.println("----------------------------------------");
+                out.println("Task ID          : " + task.getTaskId());
+                out.println("Task Title       : " + task.getTaskTitle());
+                out.println("Subject          : " + task.getSubject());
+                out.println("Task Type        : " + task.getTaskType());
+                out.println("Due Date         : " + task.getDueDate());
+                out.println("Estimated Hours  : " + task.getEstimatedHours());
+                out.println("Status           : " + task.getStatus());
+                out.println("----------------------------------------");
+                out.println();
+            }
+        }
+    }
+    public void displayMessage(String message) {
+        out.println(message);
     }
 }

@@ -17,18 +17,6 @@ public class Task {
         this.estimatedHours = estimatedHours;
         this.status = status;
     }
-
-    public Task
-            (String taskTitle,String subject,
-             String taskType,String dueDate,int estimatedHours,
-             String status) {
-        this.taskTitle = taskTitle;
-        this.subject = subject;
-        this.taskType = taskType;
-        this.dueDate = dueDate;
-        this.estimatedHours = estimatedHours;
-    }
-
     public Long getTaskId() {
         return taskId;
     }
@@ -96,8 +84,7 @@ public class Task {
                 subject.equals(other.subject) &&
                 taskType.equals(other.taskType) &&
                 dueDate.equals(other.dueDate) &&
-                estimatedHours == other.estimatedHours &&
-                status.equals(other.status);
+                estimatedHours == other.estimatedHours;
     }
 
 }

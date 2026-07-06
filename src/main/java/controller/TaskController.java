@@ -2,14 +2,12 @@ package controller;
 
 import model.Task;
 import service.TaskService;
-
-import static java.lang.System.clearProperty;
-import static java.lang.System.out;
+import view.ConsoleView;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Vector;
+import static java.lang.System.out;
 
 public class TaskController {
     private TaskService taskService;
@@ -22,12 +20,13 @@ public class TaskController {
     }
 
     public void start() throws IOException {
-        Scanner scanner = new Scanner(System.in);
-
+            
         boolean run = true;
 
         while (run) {
 
+            try {    
+            int userChoice = consoleView.showMainMenu();
 
             switch (userChoice) {
                 case 1:
@@ -56,83 +55,85 @@ public class TaskController {
                     break;
                 case 9:
                     run = false;
-                    out.println("Exiting program...");
+                    consoleView.displayMessage("Exiting... program");
                     break;
 
                 default:
-                    out.println("Invalid input!");
+                    consoleView.displayMessage("Invalid input!");
             }
+        } catch (IOException e) {
+                consoleView.displayMessage(e.getMessage());
         }
-        scanner.close();
+    }
     }
 
     public void addTaskFlow() throws IOException {
 
-        Task task = view.getTaskInput();
+        Task task = consoleView.readTask();
 
-        String result = taskService.addTask(task);
+        String message = taskService.addTask(task);
 
-        view.displayMessage(result);
+        consoleView.displayMessage(message);
     }
 
     public void viewAllTaskFlow() throws IOException {
 
-        List<Task> tasks = taskService.viewAllTask();
-        view.displayTask(tasks);
+        List<Task> taskList = taskService.getAllTasks();
+        consoleView.displayTasks(taskList);
     }
 
     public void searchTaskFlow() throws IOException {
 
-        Long taskId = view.getTaskIdInput();
+        Long taskId = consoleView.readTaskId();
 
-        Task searchTask = taskService.searchTask(taskId);
+        Task task = taskService.searchTask(taskId);
 
-        view.displayTask(searchTask);
+        consoleView.displayTask(task);
     }
 
     public void updateTaskFlow() throws IOException {
 
-        Long taskId = view.getTaskIdInput();
+        Long taskId = consoleView.readTaskId();
 
-        Task updatedTask = view.getUpdatedTaskInput();
+        Task updatedTask = consoleView.readTask();
 
         updatedTask.setTaskId(taskId);
 
-        String result = taskService.updateTask(updatedTask);
+        String message = taskService.updateTask(updatedTask);
 
-        view.displayMessage(result);
+        consoleView.displayMessage(message);
 
     }
 
     public void markCompletedFlow() throws IOException {
 
-        Long taskId = view.getTaskIdInput();
+        Long taskId = consoleView.readTaskId();
 
-        String result = taskService.markTaskCompleted(taskId);
+        String message = taskService.markTaskCompleted(taskId);
 
-        view.displayMessage(result);
+        consoleView.displayMessage(message);
     }
 
     public void deleteTaskFlow() throws IOException {
 
-        Long taskId = view.getTaskIdInput();
+        Long taskId = consoleView.readTaskId();
 
-        String result = taskService.deleteTask(taskId);
+        String message = taskService.deleteTask(taskId);
 
-        view.displayMessage(result);
+        consoleView.displayMessage(message);
     }
 
     public void viewPendingFlow() throws IOException {
 
         List<Task> pendingTask = taskService.viewPendingTask();
 
-        view.displayTask(pendingTask);
+        consoleView.displayTasks(pendingTask);
     }
 
-    public void viewCompletedFlow() {
+    public void viewCompletedFlow() throws IOException{
 
         List<Task> completedTask = taskService.viewCompletedTask();
 
-        view.displayTask(completedTask);
+        consoleView.displayTasks(completedTask);
     }
 }

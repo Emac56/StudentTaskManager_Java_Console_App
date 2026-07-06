@@ -10,8 +10,12 @@ public class TaskRepository {
 
     private File databaseFile;
 
-    public TaskRepository(File databaseFile) {
+    public TaskRepository(File databaseFile) throws IOException {
         this.databaseFile = databaseFile;
+        
+        if (!databaseFile.exists()) {
+            databaseFile.createNewFile();
+        }
     }
 
     public List<Task> loadTask() throws IOException {
@@ -41,6 +45,7 @@ public class TaskRepository {
     }
 
     public void saveTask(Task task) throws IOException {
+
         var writer = new BufferedWriter(new FileWriter(databaseFile, true));
 
         writer.write(
@@ -100,6 +105,7 @@ public class TaskRepository {
 
             if (task.getTaskId().equals(taskId)) {
                 taskList.remove(i);
+                break;
             }
         }
         saveAllTask(taskList);

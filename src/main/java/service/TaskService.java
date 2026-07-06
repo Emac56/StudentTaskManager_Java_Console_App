@@ -21,6 +21,7 @@ public class TaskService {
             return "Task already exist.";
         }
         task.setTaskId(generateTaskId());
+        task.setStatus("Pending");
         taskRepository.saveTask(task);
 
         return "Task added successfully.";
@@ -107,5 +108,9 @@ public class TaskService {
                 lastTaskId = task.getTaskId();
             }
         } return lastTaskId + 1;
+    }
+    public List<Task> getAllTasks() throws IOException {
+
+        return taskRepository.loadTask();
     }
 }
