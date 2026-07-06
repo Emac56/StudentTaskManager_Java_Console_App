@@ -37,7 +37,7 @@ public class ConsoleView {
     }
 
     public Task readTask() throws IOException {
-        out.print("Enter Task Title:");
+        out.print("\nEnter Task Title:");
         String taskTitle =  scanner.nextLine();
 
         out.print("Enter Task Subject:");
@@ -63,7 +63,7 @@ public class ConsoleView {
     }
     public Long readTaskId() {
         
-        out.print("Enter Task Id:");
+        out.print("\nEnter Task Id:");
         Long taskId = Long.parseLong(scanner.nextLine());
         
         return taskId;
@@ -71,7 +71,7 @@ public class ConsoleView {
     public void displayTask(Task task) {
         
         if(task != null) {
-            out.println("------------------------------------------");
+            out.println("\n------------------------------------------");
             out.println("Task ID               :" + task.getTaskId());
             out.println("Task Title            : " + task.getTaskTitle());
             out.println("Subject               :" + task.getSubject());
@@ -87,10 +87,10 @@ public class ConsoleView {
     public void displayTasks(List<Task> taskList) {
         
         if (taskList.isEmpty()) {
-            out.println("No Tasks Found");
+            out.println("\nNo Tasks Found");
         } else {
             for (Task task : taskList) {
-                out.println("----------------------------------------");
+                out.println("\n----------------------------------------");
                 out.println("Task ID          : " + task.getTaskId());
                 out.println("Task Title       : " + task.getTaskTitle());
                 out.println("Subject          : " + task.getSubject());

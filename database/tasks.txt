@@ -1,1 +1,0 @@
-1|Creating StudentTaskManager|Programming Java|Programming|2026-07-7|5|Completed
