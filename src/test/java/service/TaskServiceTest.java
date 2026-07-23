@@ -51,6 +51,27 @@ class TaskServiceTest {
     }
 
     @Test
+    void shouldReturnMessageWithLeadingWhitespaceBeforeStripping() throws IOException {
+        Task task = new Task(
+                null,
+                "Java Project",
+                "Programming",
+                "Project",
+                "2026-07-10",
+                10,
+                null
+        );
+
+        when(taskRepository.loadTask()).thenReturn(List.of());
+
+        String result = taskService.addTask(task);
+
+        assertNotEquals("Task added successfully.", result);
+        assertTrue(result.startsWith("\n"));
+        assertEquals("Task added successfully.", result.stripLeading());
+    }
+
+    @Test
     void shouldNotAddDuplicateTask() throws IOException {
         Task task = new Task(
                 null,
