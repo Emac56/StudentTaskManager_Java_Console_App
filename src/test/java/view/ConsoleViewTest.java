@@ -194,6 +194,17 @@ void shouldRejectNegativeEstimatedHours() throws Exception {
 
     assertEquals(5, task.getEstimatedHours());
 }
+@Test
+void shouldRetryMenuSelectionOnOutOfRangeInput() {
+    
+    String input = "100\n5\n";
+    Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
+    ConsoleView consoleView = new ConsoleView(scanner);
+
+    int choice = consoleView.showMainMenu();
+
+    assertEquals(5, choice);
+}
 }
     
     

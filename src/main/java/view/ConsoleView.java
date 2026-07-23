@@ -33,7 +33,11 @@ public class ConsoleView {
         while (true) {
             out.print("Enter choice: ");
             try {
-                return Integer.parseInt(scanner.nextLine());
+                int choice = Integer.parseInt(scanner.nextLine());
+                if (choice >= 1 && choice <= 9) {
+                    return choice;
+                }
+                out.println("Error: Choice must be between 1 and 9. Please try again.");
             } catch (NumberFormatException e) {
                 out.println("Error: Invalid input. Please enter a valid number (1-9).");
             }
