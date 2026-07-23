@@ -29,7 +29,6 @@ class TaskServiceTest {
 
     @Test
     void shouldAddTaskSuccessfully() throws IOException {
-
         Task task = new Task(
                 null,
                 "Java Project",
@@ -44,7 +43,7 @@ class TaskServiceTest {
 
         String result = taskService.addTask(task);
 
-        assertEquals("Task added successfully.", result);
+        assertEquals("Task added successfully.", result.stripLeading());
         assertEquals(1L, task.getTaskId());
         assertEquals("Pending", task.getStatus());
 
@@ -53,7 +52,6 @@ class TaskServiceTest {
 
     @Test
     void shouldNotAddDuplicateTask() throws IOException {
-
         Task task = new Task(
                 null,
                 "Java Project",
@@ -68,14 +66,13 @@ class TaskServiceTest {
 
         String result = taskService.addTask(task);
 
-        assertEquals("Task already exist.", result);
+        assertEquals("Task already exist.", result.stripLeading());
 
         verify(taskRepository, never()).saveTask(any(Task.class));
     }
 
     @Test
     void shouldSearchTask() throws IOException {
-
         Task task = new Task(
                 1L,
                 "Java Project",
@@ -96,7 +93,6 @@ class TaskServiceTest {
 
     @Test
     void shouldUpdateTaskSuccessfully() throws IOException {
-
         Task task = new Task(
                 1L,
                 "Updated Task",
@@ -111,14 +107,13 @@ class TaskServiceTest {
 
         String result = taskService.updateTask(task);
 
-        assertEquals("Task updated successfully.", result);
+        assertEquals("Task updated successfully.", result.stripLeading());
 
         verify(taskRepository).updateTask(task);
     }
 
     @Test
     void shouldReturnTaskNotFoundWhenUpdating() throws IOException {
-
         Task task = new Task(
                 1L,
                 "Updated Task",
@@ -133,14 +128,13 @@ class TaskServiceTest {
 
         String result = taskService.updateTask(task);
 
-        assertEquals("Task not found.", result);
+        assertEquals("Task not found.", result.stripLeading());
 
         verify(taskRepository, never()).updateTask(any(Task.class));
     }
 
     @Test
     void shouldDeleteTaskSuccessfully() throws IOException {
-
         Task task = new Task(
                 1L,
                 "Java",
@@ -155,26 +149,24 @@ class TaskServiceTest {
 
         String result = taskService.deleteTask(1L);
 
-        assertEquals("Task deleted Successfully.", result);
+        assertEquals("Task deleted Successfully.", result.stripLeading());
 
         verify(taskRepository).deleteTask(1L);
     }
 
     @Test
     void shouldReturnTaskNotFoundWhenDeleting() throws IOException {
-
         when(taskRepository.findTaskById(1L)).thenReturn(null);
 
         String result = taskService.deleteTask(1L);
 
-        assertEquals("Task not found.", result);
+        assertEquals("Task not found.", result.stripLeading());
 
         verify(taskRepository, never()).deleteTask(anyLong());
     }
 
     @Test
     void shouldMarkTaskCompletedSuccessfully() throws IOException {
-
         Task task = new Task(
                 1L,
                 "Java",
@@ -189,7 +181,7 @@ class TaskServiceTest {
 
         String result = taskService.markTaskCompleted(1L);
 
-        assertEquals("Task mark as completed.", result);
+        assertEquals("Task mark as completed.", result.stripLeading());
         assertEquals("Completed", task.getStatus());
 
         verify(taskRepository).updateTask(task);
@@ -197,19 +189,17 @@ class TaskServiceTest {
 
     @Test
     void shouldReturnTaskNotFoundWhenMarkingCompleted() throws IOException {
-
         when(taskRepository.findTaskById(1L)).thenReturn(null);
 
         String result = taskService.markTaskCompleted(1L);
 
-        assertEquals("Task not found", result);
+        assertEquals("Task not found", result.stripLeading());
 
         verify(taskRepository, never()).updateTask(any(Task.class));
     }
 
     @Test
     void shouldReturnPendingTasks() throws IOException {
-
         List<Task> tasks = List.of(
                 new Task(1L, "Java", "Programming", "Project", "2026", 5, "Pending"),
                 new Task(2L, "Math", "Math", "Homework", "2026", 2, "Completed"),
@@ -225,7 +215,6 @@ class TaskServiceTest {
 
     @Test
     void shouldReturnCompletedTasks() throws IOException {
-
         List<Task> tasks = List.of(
                 new Task(1L, "Java", "Programming", "Project", "2026", 5, "Pending"),
                 new Task(2L, "Math", "Math", "Homework", "2026", 2, "Completed"),
@@ -240,8 +229,44 @@ class TaskServiceTest {
     }
 
     @Test
-    void shouldGenerateNextTaskId() throws IOException {
+    void shouldReturnEmptyListWhenNoPendingTasksExist() throws IOException {
+        List<Task> tasks = List.of(
+                new Task(1L, "Math", "Math", "Homework", "2026", 2, "Completed")
+        );
 
+        when(taskRepository.loadTask()).thenReturn(tasks);
+
+        List<Task> result = taskService.viewPendingTask();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoCompletedTasksExist() throws IOException {
+        List<Task> tasks = List.of(
+                new Task(1L, "Java", "Programming", "Project", "2026", 5, "Pending")
+        );
+
+        when(taskRepository.loadTask()).thenReturn(tasks);
+
+        List<Task> result = taskService.viewCompletedTask();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenTaskListIsEmpty() throws IOException {
+        when(taskRepository.loadTask()).thenReturn(List.of());
+
+        List<Task> pendingResult = taskService.viewPendingTask();
+        List<Task> completedResult = taskService.viewCompletedTask();
+
+        assertTrue(pendingResult.isEmpty());
+        assertTrue(completedResult.isEmpty());
+    }
+
+    @Test
+    void shouldGenerateNextTaskId() throws IOException {
         List<Task> tasks = List.of(
                 new Task(1L, "A", "A", "A", "2026", 1, "Pending"),
                 new Task(5L, "B", "B", "B", "2026", 1, "Pending"),
@@ -257,7 +282,6 @@ class TaskServiceTest {
 
     @Test
     void shouldGenerateOneWhenNoTaskExists() throws IOException {
-
         when(taskRepository.loadTask()).thenReturn(List.of());
 
         Long result = taskService.generateTaskId();
@@ -267,7 +291,6 @@ class TaskServiceTest {
 
     @Test
     void shouldReturnAllTasks() throws IOException {
-
         List<Task> tasks = List.of(
                 new Task(1L, "Java", "Programming", "Project", "2026", 5, "Pending")
         );
@@ -279,3 +302,5 @@ class TaskServiceTest {
         assertEquals(tasks, result);
     }
 }
+
+
