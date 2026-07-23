@@ -43,7 +43,7 @@ class TaskServiceTest {
 
         String result = taskService.addTask(task);
 
-        assertEquals("\nTask added successfully.", result);
+        assertEquals("Task added successfully.", result.stripLeading());
         assertEquals(1L, task.getTaskId());
         assertEquals("Pending", task.getStatus());
 
@@ -66,7 +66,7 @@ class TaskServiceTest {
 
         String result = taskService.addTask(task);
 
-        assertEquals("\nTask already exist.", result);
+        assertEquals("Task already exist.", result.stripLeading());
 
         verify(taskRepository, never()).saveTask(any(Task.class));
     }
@@ -107,7 +107,7 @@ class TaskServiceTest {
 
         String result = taskService.updateTask(task);
 
-        assertEquals("\nTask updated successfully.", result);
+        assertEquals("Task updated successfully.", result.stripLeading());
 
         verify(taskRepository).updateTask(task);
     }
@@ -128,7 +128,7 @@ class TaskServiceTest {
 
         String result = taskService.updateTask(task);
 
-        assertEquals("\nTask not found.", result);
+        assertEquals("Task not found.", result.stripLeading());
 
         verify(taskRepository, never()).updateTask(any(Task.class));
     }
@@ -149,7 +149,7 @@ class TaskServiceTest {
 
         String result = taskService.deleteTask(1L);
 
-        assertEquals("\nTask deleted Successfully.", result);
+        assertEquals("Task deleted Successfully.", result.stripLeading());
 
         verify(taskRepository).deleteTask(1L);
     }
@@ -160,7 +160,7 @@ class TaskServiceTest {
 
         String result = taskService.deleteTask(1L);
 
-        assertEquals("\nTask not found.", result);
+        assertEquals("Task not found.", result.stripLeading());
 
         verify(taskRepository, never()).deleteTask(anyLong());
     }
@@ -181,7 +181,7 @@ class TaskServiceTest {
 
         String result = taskService.markTaskCompleted(1L);
 
-        assertEquals("\nTask mark as completed.", result);
+        assertEquals("Task mark as completed.", result.stripLeading());
         assertEquals("Completed", task.getStatus());
 
         verify(taskRepository).updateTask(task);
@@ -193,7 +193,7 @@ class TaskServiceTest {
 
         String result = taskService.markTaskCompleted(1L);
 
-        assertEquals("\nTask not found", result);
+        assertEquals("Task not found", result.stripLeading());
 
         verify(taskRepository, never()).updateTask(any(Task.class));
     }
