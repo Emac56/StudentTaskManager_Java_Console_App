@@ -301,6 +301,39 @@ class TaskServiceTest {
 
         assertEquals(tasks, result);
     }
+    
+    @Test
+    void shouldPreserveExistingStatusWhenUpdatingWithNullStatus() throws IOException {
+    // Original task in database
+    Task existingTask = new Task(
+            1L,
+            "Old Task Title",
+            "Programming",
+            "Project",
+            "2026-07-10",
+            5,
+            "Completed" // Original status is "Completed"
+    );
+
+    // Incoming updated task with null status from UI
+    Task updatedTask = new Task(
+            1L,
+            "Updated Task Title",
+            "Programming",
+            "Project",
+            "2026-07-20",
+            8,
+            null // Null status
+    );
+
+    when(taskRepository.findTaskById(1L)).thenReturn(existingTask);
+
+    String result = taskService.updateTask(updatedTask);
+
+    assertEquals("Task updated successfully.", result.stripLeading());
+    assertEquals("Completed", updatedTask.getStatus()); // Na-preserve ang dating status!
+    verify(taskRepository).updateTask(updatedTask);
+}
 }
 
 

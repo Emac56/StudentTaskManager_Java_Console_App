@@ -38,17 +38,21 @@ public class TaskService {
 
         return task;
     }
-
+    
     public String updateTask(Task updatedTask) throws IOException {
-
+        
         Task existingTask = taskRepository.findTaskById(updatedTask.getTaskId());
-
+        
         if (existingTask != null) {
-            taskRepository.updateTask(updatedTask);
-            return "\nTask updated successfully.";
-        } else {
-            return "\nTask not found.";
+        // Preserve the existing status if the updatedTask status is null
+        if (updatedTask.getStatus() == null) {
+            updatedTask.setStatus(existingTask.getStatus());
         }
+        taskRepository.updateTask(updatedTask);
+        return "\nTask updated successfully.";
+    } else {
+        return "\nTask not found.";
+    }
     }
     public String deleteTask(Long taskId) throws IOException {
 

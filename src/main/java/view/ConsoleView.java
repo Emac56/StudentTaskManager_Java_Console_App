@@ -29,48 +29,74 @@ public class ConsoleView {
         out.println("[7] View Pending Task");
         out.println("[8] View Completed Task");
         out.println("[9] Exit");
-        out.print("Enter choice: ");
-        int userChoice = scanner.nextInt();
-        scanner.nextLine();
+        
+        while (true) {
+            out.print("Enter choice: ");
+            try {
+                return Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                out.println("Error: Invalid input. Please enter a valid number (1-9).");
+            }
+        }
+    }
 
-        return userChoice;
+    private String readStringInput(String prompt) {
+        while (true) {
+            out.print(prompt);
+            String input = scanner.nextLine();
+            if (input.contains("|")) {
+                out.println("Error: Input cannot contain the pipe character '|'. Please try again.");
+            } else {
+                return input;
+            }
+        }
     }
 
     public Task readTask() throws IOException {
-        out.print("\nEnter Task Title:");
-        String taskTitle =  scanner.nextLine();
+        String taskTitle = readStringInput("\nEnter Task Title:");
+        String taskSubject = readStringInput("Enter Task Subject:");
+        String taskType = readStringInput("Enter Task Type:");
+        String taskDueDate = readStringInput("Enter Task Due-Date:");
 
-        out.print("Enter Task Subject:");
-        String taskSubject =  scanner.nextLine();
-
-        out.print("Enter Task Type:");
-        String taskType =  scanner.nextLine();
-
-        out.print("Enter Task Due-Date:");
-        String taskDueDate =  scanner.nextLine();
-
-        out.print("Enter Task Estimated Hours:");
-        int taskEstimatedHours = Integer.parseInt(scanner.nextLine());
+        int taskEstimatedHours = 0;
+        while (true) {
+            out.print("Enter Task Estimated Hours:");
+            try {
+                taskEstimatedHours = Integer.parseInt(scanner.nextLine());
+                if (taskEstimatedHours < 0) {
+                    out.println("Error: Estimated hours cannot be negative.");
+                    continue;
+                }
+                break;
+            } catch (NumberFormatException e) {
+                out.println("Error: Invalid hours. Please enter a valid integer.");
+            }
+        }
 
         return new Task(
-        null,
-        taskTitle,
-        taskSubject,
-        taskType,
-        taskDueDate,
-        taskEstimatedHours,
-        null);
+                null,
+                taskTitle,
+                taskSubject,
+                taskType,
+                taskDueDate,
+                taskEstimatedHours,
+                null
+        );
     }
+
     public Long readTaskId() {
-        
-        out.print("\nEnter Task Id:");
-        Long taskId = Long.parseLong(scanner.nextLine());
-        
-        return taskId;
+        while (true) {
+            out.print("\nEnter Task Id:");
+            try {
+                return Long.parseLong(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                out.println("Error: Invalid Task ID. Please enter a valid number.");
+            }
+        }
     }
+
     public void displayTask(Task task) {
-        
-        if(task != null) {
+        if (task != null) {
             out.println("\n------------------------------------------");
             out.println("Task ID               :" + task.getTaskId());
             out.println("Task Title            : " + task.getTaskTitle());
@@ -84,8 +110,8 @@ public class ConsoleView {
             out.println("\nTask not found");
         }
     }
+
     public void displayTasks(List<Task> taskList) {
-        
         if (taskList.isEmpty()) {
             out.println("\nNo Tasks Found");
         } else {
@@ -103,6 +129,7 @@ public class ConsoleView {
             }
         }
     }
+
     public void displayMessage(String message) {
         out.println(message);
     }
