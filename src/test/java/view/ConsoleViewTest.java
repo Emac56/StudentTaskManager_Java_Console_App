@@ -136,4 +136,75 @@ class ConsoleViewTest {
         assertDoesNotThrow(() ->
                 consoleView.displayMessage("Hello"));
     }
+    @Test
+    void shouldRetryMenuSelectionOnInvalidInput() {
+        
+    String input = "abc\n3\n";
+    Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
+    ConsoleView consoleView = new ConsoleView(scanner);
+
+    int choice = consoleView.showMainMenu();
+
+    assertEquals(3, choice);
+    }
+    @Test
+    void shouldRetryTaskIdOnInvalidInput() {
+        
+    String input = "xyz\n42\n";
+    Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
+    ConsoleView consoleView = new ConsoleView(scanner);
+
+    Long id = consoleView.readTaskId();
+
+    assertEquals(42L, id); 
+    }
+    @Test
+void shouldRejectPipeCharactersInStringInputs() throws Exception {
+    
+    String input = 
+            "Java|Project\n" + 
+            "Java Project\n" + 
+            "Programming\n" +
+            "Project\n" +
+            "2026-07-10\n" +
+            "10\n";
+
+    Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
+    ConsoleView consoleView = new ConsoleView(scanner);
+
+    Task task = consoleView.readTask();
+
+    assertEquals("Java Project", task.getTaskTitle()); // Tinanggap ang malinis na input pagkatapos tanggihan ang may pipe
+
 }
+    @Test
+void shouldRejectNegativeEstimatedHours() throws Exception {
+    String input = 
+            "Java Project\n" +
+            "Programming\n" +
+            "Project\n" +
+            "2026-07-10\n" +
+            "-5\n" + 
+            "5\n"; 
+
+    Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
+    ConsoleView consoleView = new ConsoleView(scanner);
+
+    Task task = consoleView.readTask();
+
+    assertEquals(5, task.getEstimatedHours());
+}
+@Test
+void shouldRetryMenuSelectionOnOutOfRangeInput() {
+    
+    String input = "100\n5\n";
+    Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
+    ConsoleView consoleView = new ConsoleView(scanner);
+
+    int choice = consoleView.showMainMenu();
+
+    assertEquals(5, choice);
+}
+}
+    
+    

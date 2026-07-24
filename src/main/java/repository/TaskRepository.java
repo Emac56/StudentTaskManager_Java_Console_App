@@ -11,11 +11,11 @@ public class TaskRepository {
     private File databaseFile;
 
     public TaskRepository(File databaseFile) throws IOException {
-        
+
         this.databaseFile = databaseFile;
-        
+
         File parent = databaseFile.getParentFile();
-        
+
         if (parent != null && !parent.exists()) {
             parent.mkdirs();
         }
@@ -50,7 +50,39 @@ public class TaskRepository {
         return taskList;
     }
 
+    /**
+     * Defensive persistence invariant: verifies that no string field in the task
+     * contains the pipe character '|' before any write reaches the file.
+     *
+     * This is the repository's own last-line-of-defence check.  The primary
+     * enforcement lives in TaskService.validateNoPipe(), but this guard catches
+     * any call that bypasses the service layer (tests, future code paths, etc.).
+     *
+     * Throws IllegalStateException rather than IllegalArgumentException to signal
+     * that reaching this point is a programming error — the service layer should
+     * have already caught it.
+     *
+     * @throws IllegalStateException if any string field contains '|'
+     */
+    private void assertNoPipe(Task task) {
+        assertFieldNoPipe("taskTitle", task.getTaskTitle());
+        assertFieldNoPipe("subject",   task.getSubject());
+        assertFieldNoPipe("taskType",  task.getTaskType());
+        assertFieldNoPipe("dueDate",   task.getDueDate());
+        assertFieldNoPipe("status",    task.getStatus());
+    }
+
+    private void assertFieldNoPipe(String fieldName, String value) {
+        if (value != null && value.contains("|")) {
+            throw new IllegalStateException(
+                "Persistence invariant violated: field '" + fieldName +
+                "' contains the pipe delimiter '|'. Offending value: " + value
+            );
+        }
+    }
+
     public void saveTask(Task task) throws IOException {
+        assertNoPipe(task);
 
         var writer = new BufferedWriter(new FileWriter(databaseFile, true));
 
@@ -68,6 +100,13 @@ public class TaskRepository {
     }
 
     public void saveAllTask(List<Task> taskList) throws IOException {
+        // Validate every task BEFORE opening the file for writing.
+        // FileWriter(databaseFile) truncates on open, so a pipe found mid-loop
+        // would leave the file partially overwritten with no way to recover.
+        for (Task task : taskList) {
+            assertNoPipe(task);
+        }
+
         var writer = new BufferedWriter(new FileWriter(databaseFile));
 
         for (Task task : taskList) {
@@ -129,18 +168,3 @@ public class TaskRepository {
         return null;
     }
 }
-
-    //public Task findTaskByTitle(String title) throws IOException {
-
-        //List<Task> taskList = loadTask();
-
-        //for (Task task : taskList) {
-
-            //if (task.getTaskTitle().equalsIgnoreCase(title)) {
-                //return task;
-            ///}
-        //}
-        //return null;
-    //}
-//}
-
