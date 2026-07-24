@@ -92,7 +92,12 @@ public class ConsoleView {
         while (true) {
             out.print("\nEnter Task Id:");
             try {
-                return Long.parseLong(scanner.nextLine());
+                long id = Long.parseLong(scanner.nextLine());
+                if (id <= 0) {
+                    out.println("Error: Task ID must be a positive number. Please try again.");
+                    continue;
+                }
+                return id;
             } catch (NumberFormatException e) {
                 out.println("Error: Invalid Task ID. Please enter a valid number.");
             }
