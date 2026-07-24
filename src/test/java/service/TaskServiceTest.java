@@ -301,39 +301,191 @@ class TaskServiceTest {
 
         assertEquals(tasks, result);
     }
-    
+
     @Test
     void shouldPreserveExistingStatusWhenUpdatingWithNullStatus() throws IOException {
-    // Original task in database
-    Task existingTask = new Task(
-            1L,
-            "Old Task Title",
-            "Programming",
-            "Project",
-            "2026-07-10",
-            5,
-            "Completed" // Original status is "Completed"
-    );
+        Task existingTask = new Task(
+                1L,
+                "Old Task Title",
+                "Programming",
+                "Project",
+                "2026-07-10",
+                5,
+                "Completed"
+        );
 
-    // Incoming updated task with null status from UI
-    Task updatedTask = new Task(
-            1L,
-            "Updated Task Title",
-            "Programming",
-            "Project",
-            "2026-07-20",
-            8,
-            null // Null status
-    );
+        Task updatedTask = new Task(
+                1L,
+                "Updated Task Title",
+                "Programming",
+                "Project",
+                "2026-07-20",
+                8,
+                null
+        );
 
-    when(taskRepository.findTaskById(1L)).thenReturn(existingTask);
+        when(taskRepository.findTaskById(1L)).thenReturn(existingTask);
 
-    String result = taskService.updateTask(updatedTask);
+        String result = taskService.updateTask(updatedTask);
 
-    assertEquals("Task updated successfully.", result.stripLeading());
-    assertEquals("Completed", updatedTask.getStatus()); // Na-preserve ang dating status!
-    verify(taskRepository).updateTask(updatedTask);
+        assertEquals("Task updated successfully.", result.stripLeading());
+        assertEquals("Completed", updatedTask.getStatus());
+        verify(taskRepository).updateTask(updatedTask);
+    }
+
+    // --- Pipe-rejection tests (business-layer invariant) ---
+
+    @Test
+    void shouldRejectAddTaskWithPipeInTaskTitle() {
+        Task task = new Task(
+                null,
+                "Java|Project",   // pipe in title
+                "Programming",
+                "Project",
+                "2026-07-10",
+                10,
+                null
+        );
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> taskService.addTask(task));
+
+        assertTrue(ex.getMessage().contains("taskTitle"));
+        // loadTask must never be reached — validation fires first
+        verifyNoInteractions(taskRepository);
+    }
+
+    @Test
+    void shouldRejectAddTaskWithPipeInSubject() {
+        Task task = new Task(
+                null,
+                "Java Project",
+                "Pro|gramming",   // pipe in subject
+                "Project",
+                "2026-07-10",
+                10,
+                null
+        );
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> taskService.addTask(task));
+
+        assertTrue(ex.getMessage().contains("subject"));
+        verifyNoInteractions(taskRepository);
+    }
+
+    @Test
+    void shouldRejectAddTaskWithPipeInTaskType() {
+        Task task = new Task(
+                null,
+                "Java Project",
+                "Programming",
+                "Pro|ject",       // pipe in taskType
+                "2026-07-10",
+                10,
+                null
+        );
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> taskService.addTask(task));
+
+        assertTrue(ex.getMessage().contains("taskType"));
+        verifyNoInteractions(taskRepository);
+    }
+
+    @Test
+    void shouldRejectAddTaskWithPipeInDueDate() {
+        Task task = new Task(
+                null,
+                "Java Project",
+                "Programming",
+                "Project",
+                "2026|07|10",     // pipe in dueDate
+                10,
+                null
+        );
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> taskService.addTask(task));
+
+        assertTrue(ex.getMessage().contains("dueDate"));
+        verifyNoInteractions(taskRepository);
+    }
+
+    @Test
+    void shouldRejectAddTaskWithPipeInStatus() {
+        Task task = new Task(
+                null,
+                "Java Project",
+                "Programming",
+                "Project",
+                "2026-07-10",
+                10,
+                "Pend|ing"        // pipe in status
+        );
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> taskService.addTask(task));
+
+        assertTrue(ex.getMessage().contains("status"));
+        verifyNoInteractions(taskRepository);
+    }
+
+    @Test
+    void shouldRejectUpdateTaskWithPipeInTaskTitle() {
+        Task task = new Task(
+                1L,
+                "Updated|Task",   // pipe in title
+                "Programming",
+                "Project",
+                "2026-07-20",
+                8,
+                "Pending"
+        );
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> taskService.updateTask(task));
+
+        assertTrue(ex.getMessage().contains("taskTitle"));
+        // findTaskById must never be reached — validation fires first
+        verifyNoInteractions(taskRepository);
+    }
+
+    @Test
+    void shouldRejectUpdateTaskWithPipeInSubject() {
+        Task task = new Task(
+                1L,
+                "Updated Task",
+                "Pro|gramming",   // pipe in subject
+                "Project",
+                "2026-07-20",
+                8,
+                "Pending"
+        );
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> taskService.updateTask(task));
+
+        assertTrue(ex.getMessage().contains("subject"));
+        verifyNoInteractions(taskRepository);
+    }
+
+    @Test
+    void shouldRejectUpdateTaskWithPipeInDueDate() {
+        Task task = new Task(
+                1L,
+                "Updated Task",
+                "Programming",
+                "Project",
+                "2026|07|20",     // pipe in dueDate
+                8,
+                "Pending"
+        );
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> taskService.updateTask(task));
+
+        assertTrue(ex.getMessage().contains("dueDate"));
+        verifyNoInteractions(taskRepository);
+    }
 }
-}
-
-
