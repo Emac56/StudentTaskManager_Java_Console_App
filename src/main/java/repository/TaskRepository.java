@@ -30,21 +30,40 @@ public class TaskRepository {
         var reader = new BufferedReader(new FileReader(databaseFile));
 
         String line;
+        int lineNumber = 0;
 
         while ((line = reader.readLine()) != null) {
+            lineNumber++;
 
-            String[] data = line.split("\\|");
+            if (line.isBlank()) {
+                continue;
+            }
 
-            Task task = new Task(
-                    Long.parseLong(data[0]),
-                    data[1],
-                    data[2],
-                    data[3],
-                    data[4],
-                    Integer.parseInt(data[5]),
-                    data[6]
-            );
-            taskList.add(task);
+            // limit = -1 keeps trailing empty fields (e.g. an empty status)
+            // instead of silently dropping them, which would shift/short the array.
+            String[] data = line.split("\\|", -1);
+
+            if (data.length < 7) {
+                System.out.println("Warning: Skipping malformed task on line "
+                        + lineNumber + " (expected 7 fields, found " + data.length + ").");
+                continue;
+            }
+
+            try {
+                Task task = new Task(
+                        Long.parseLong(data[0]),
+                        data[1],
+                        data[2],
+                        data[3],
+                        data[4],
+                        Integer.parseInt(data[5]),
+                        data[6]
+                );
+                taskList.add(task);
+            } catch (NumberFormatException e) {
+                System.out.println("Warning: Skipping malformed task on line "
+                        + lineNumber + " (invalid number format for ID or estimated hours).");
+            }
         }
         reader.close();
         return taskList;
@@ -168,3 +187,5 @@ public class TaskRepository {
         return null;
     }
 }
+
+

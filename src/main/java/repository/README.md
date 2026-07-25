@@ -35,6 +35,14 @@ public List<Task> loadTask() throws IOException
 ```
 Reads every line in `tasks.txt`, parses each one into a `Task` object, and returns the full list. This is the foundation method — nearly every other method in the Repository (and Service) calls `loadTask()` first to get the current state of the data.
 
+**Resilience to malformed data.** `loadTask()` does not assume every line in the file is well-formed. It:
+- Skips blank lines silently.
+- Splits each line with `split("\\|", -1)` so a trailing empty field (e.g. an empty `status`) is preserved as `""` instead of being dropped, which would otherwise shift/short the array.
+- Skips a line (with a console warning naming the line number) if it doesn't contain the expected 7 fields.
+- Skips a line (with a console warning naming the line number) if `taskId` or `estimatedHours` isn't a valid number.
+
+A single corrupted or hand-edited row in `tasks.txt` is logged and skipped rather than crashing every feature in the app — the rest of the valid tasks still load normally.
+
 ### `saveTask(Task task)`
 ```java
 public void saveTask(Task task) throws IOException
@@ -68,3 +76,5 @@ Loads all tasks and searches for the one matching the given ID, returning `null`
 ## Design Note
 
 Because there's no database engine handling row-level updates, this Repository takes a simple **"load everything, modify in memory, save everything"** approach for updates and deletes. It's not the most efficient method for a huge dataset, but it's straightforward, easy to reason about, and appropriate for a learning project or a small personal task list.
+
+
