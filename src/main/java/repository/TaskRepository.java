@@ -43,7 +43,7 @@ public class TaskRepository {
             // instead of silently dropping them, which would shift/short the array.
             String[] data = line.split("\\|", -1);
 
-            if (data.length < 7) {
+            if (data.length != 7) {
                 System.out.println("Warning: Skipping malformed task on line "
                         + lineNumber + " (expected 7 fields, found " + data.length + ").");
                 continue;

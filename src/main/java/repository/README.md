@@ -38,7 +38,7 @@ Reads every line in `tasks.txt`, parses each one into a `Task` object, and retur
 **Resilience to malformed data.** `loadTask()` does not assume every line in the file is well-formed. It:
 - Skips blank lines silently.
 - Splits each line with `split("\\|", -1)` so a trailing empty field (e.g. an empty `status`) is preserved as `""` instead of being dropped, which would otherwise shift/short the array.
-- Skips a line (with a console warning naming the line number) if it doesn't contain the expected 7 fields.
+- Skips a line (with a console warning naming the line number) if it doesn't contain **exactly** 7 fields — too few (missing data) or too many (extra `|` delimiters, e.g. from hand-edited data) are both treated as malformed, instead of silently discarding or shifting columns.
 - Skips a line (with a console warning naming the line number) if `taskId` or `estimatedHours` isn't a valid number.
 
 A single corrupted or hand-edited row in `tasks.txt` is logged and skipped rather than crashing every feature in the app — the rest of the valid tasks still load normally.

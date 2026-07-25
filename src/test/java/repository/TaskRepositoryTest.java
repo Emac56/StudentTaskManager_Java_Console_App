@@ -331,6 +331,22 @@ class TaskRepositoryTest {
     }
 
     @Test
+    void shouldSkipLineWithMoreThanSevenFields() throws Exception {
+        String content =
+                "1|Java|Prog|Project|2026|5|Pending\n"
+                        + "2|Math|Homework|Assignment|2026|2|Pending|Extra\n" // 8 fields, extra pipe
+                        + "3|Science|Sci|Homework|2026|1|Pending\n";
+
+        Files.writeString(databaseFile.toPath(), content);
+
+        List<Task> tasks = repository.loadTask();
+
+        assertEquals(2, tasks.size());
+        assertEquals("Java", tasks.get(0).getTaskTitle());
+        assertEquals("Science", tasks.get(1).getTaskTitle());
+    }
+
+    @Test
     void shouldPreserveEmptyTrailingFieldInsteadOfDroppingIt() throws Exception {
         // Status field left empty on purpose — this used to shorten the
         // split() array from 7 to 6 elements and throw
