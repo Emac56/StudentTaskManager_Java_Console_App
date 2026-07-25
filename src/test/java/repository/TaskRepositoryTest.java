@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -296,4 +297,97 @@ class TaskRepositoryTest {
         assertEquals(1, survivors.size());
         assertEquals("Java", survivors.get(0).getTaskTitle());
     }
+
+    // --- loadTask() resilience to malformed data (see repository/README.md) ---
+
+    @Test
+    void shouldSkipBlankLinesWhenLoadingTasks() throws Exception {
+        String content =
+                "1|Java|Prog|Project|2026|5|Pending\n"
+                        + "\n"                                   // blank line in the middle
+                        + "2|Math|Math|Homework|2026|2|Pending\n";
+
+        Files.writeString(databaseFile.toPath(), content);
+
+        List<Task> tasks = repository.loadTask();
+
+        assertEquals(2, tasks.size());
+    }
+
+    @Test
+    void shouldSkipLineWithFewerThanSevenFields() throws Exception {
+        String content =
+                "1|Java|Prog|Project|2026|5|Pending\n"
+                        + "2|Math|Homework\n"                     // only 3 fields, not 7
+                        + "3|Science|Sci|Homework|2026|1|Pending\n";
+
+        Files.writeString(databaseFile.toPath(), content);
+
+        List<Task> tasks = repository.loadTask();
+
+        assertEquals(2, tasks.size());
+        assertEquals("Java", tasks.get(0).getTaskTitle());
+        assertEquals("Science", tasks.get(1).getTaskTitle());
+    }
+
+    @Test
+    void shouldSkipLineWithMoreThanSevenFields() throws Exception {
+        String content =
+                "1|Java|Prog|Project|2026|5|Pending\n"
+                        + "2|Math|Homework|Assignment|2026|2|Pending|Extra\n" // 8 fields, extra pipe
+                        + "3|Science|Sci|Homework|2026|1|Pending\n";
+
+        Files.writeString(databaseFile.toPath(), content);
+
+        List<Task> tasks = repository.loadTask();
+
+        assertEquals(2, tasks.size());
+        assertEquals("Java", tasks.get(0).getTaskTitle());
+        assertEquals("Science", tasks.get(1).getTaskTitle());
+    }
+
+    @Test
+    void shouldPreserveEmptyTrailingFieldInsteadOfDroppingIt() throws Exception {
+        // Status field left empty on purpose — this used to shorten the
+        // split() array from 7 to 6 elements and throw
+        // ArrayIndexOutOfBoundsException before the fix.
+        String content = "1|Java|Prog|Project|2026|5|\n";
+
+        Files.writeString(databaseFile.toPath(), content);
+
+        List<Task> tasks = repository.loadTask();
+
+        assertEquals(1, tasks.size());
+        assertEquals("", tasks.get(0).getStatus());
+    }
+
+    @Test
+    void shouldSkipLineWithInvalidNumberFormat() throws Exception {
+        String content =
+                "1|Java|Prog|Project|2026|5|Pending\n"
+                        + "abc|Math|Math|Homework|2026|five|Pending\n" // bad taskId + bad hours
+                        + "3|Science|Sci|Homework|2026|1|Pending\n";
+
+        Files.writeString(databaseFile.toPath(), content);
+
+        List<Task> tasks = repository.loadTask();
+
+        assertEquals(2, tasks.size());
+    }
+
+    @Test
+    void shouldNotThrowWhenFileContainsOnlyMalformedLines() throws Exception {
+        String content =
+                "\n"
+                        + "not|enough|fields\n"
+                        + "abc|Java|Prog|Project|2026|5|Pending\n";
+
+        Files.writeString(databaseFile.toPath(), content);
+
+        List<Task> tasks = assertDoesNotThrow(() -> repository.loadTask());
+
+        assertTrue(tasks.isEmpty());
+    }
 }
+
+

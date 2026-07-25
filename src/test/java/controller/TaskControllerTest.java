@@ -12,7 +12,9 @@ import view.ConsoleView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -226,5 +228,17 @@ void shouldCallViewAllTaskFlow() throws IOException {
 
     verify(taskService).getAllTasks();
 }
+
+    @Test
+void shouldExitGracefullyWhenInputStreamEnds() throws IOException {
+
+    when(consoleView.showMainMenu())
+            .thenThrow(new NoSuchElementException());
+
+    assertDoesNotThrow(() -> controller.start());
+
+    verify(consoleView).displayMessage("\nNo more input detected. Exiting the program.");
 }
-    
+}
+
+
