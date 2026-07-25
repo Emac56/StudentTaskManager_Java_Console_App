@@ -12,7 +12,9 @@ This is the main application loop. It runs continuously until the user chooses t
 
 1. Calls `consoleView.showMainMenu()` to display the menu and get the user's numeric choice.
 2. Uses a `switch` statement to route that choice to the correct flow method (e.g. option `1` → `addTaskFlow()`).
-3. Wraps the whole loop in a `try/catch` for `IOException`, so a file error doesn't crash the whole program — it's displayed as a message instead and the loop continues.
+3. Wraps the whole loop in a `try/catch`:
+   - `IOException` — a file error doesn't crash the whole program; it's displayed as a message instead and the loop continues.
+   - `NoSuchElementException` — thrown by `Scanner` when the input stream runs out (e.g. Ctrl+D, or piped input with no more lines). Instead of crashing, the program displays an exit message and stops the loop gracefully.
 4. Choosing option `9` sets `run = false`, ending the loop and exiting the program.
 
 | Menu Option | Method Called |
@@ -43,3 +45,5 @@ Each "flow" method follows the same three-step pattern: **get input from the Vie
 ## Why the Controller Stays "Thin"
 
 Notice that the Controller never checks *whether* a task is valid, never touches the file, and never decides what counts as a duplicate — it just calls the Service and trusts it to handle the rules. This is intentional: keeping the Controller thin means the same business logic in the Service could later be reused by a different front end (a GUI, a web API, etc.) without rewriting any rules.
+
+

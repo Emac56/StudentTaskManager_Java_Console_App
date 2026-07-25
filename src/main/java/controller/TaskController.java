@@ -63,6 +63,9 @@ public class TaskController {
             }
         } catch (IOException e) {
                 consoleView.displayMessage(e.getMessage());
+        } catch (java.util.NoSuchElementException e) {
+                consoleView.displayMessage("\nNo more input detected. Exiting the program.");
+                run = false;
         }
     }
     }
@@ -137,3 +140,4 @@ public class TaskController {
         consoleView.displayTasks(completedTask);
     }
 }
+
